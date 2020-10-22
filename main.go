@@ -100,7 +100,7 @@ func getLicenseServersInfo(flexlmStats string) json {
 	for i, data := range serversFullInfo {
 		slice := splitdata(data, featureUsageSeparator)
 		server, feat := splitServerFeature(slice)
-		json.LicenseServer[i] = parseServerInfo(server)
+		json.LicenseServer = append(json.LicenseServer, parseServerInfo(server))
 		json.LicenseServer[i].FeatureUsage = getFeatureData(feat)
 
 	}
@@ -126,7 +126,7 @@ func getFeatureData(flexlmStats string) []featureUsage {
 		// TODO split feature data and active users data
 		slice := splitdata(data, "\n\n")
 		featureInfo, _, usersInfo := splitFeatureUsers(slice)
-		featuresUsage[i] = parseFeatureData(featureInfo)
+		featuresUsage = append(featuresUsage, parseFeatureData(featureInfo))
 		featuresUsage[i].Users = getUsersData(usersInfo)
 
 	}
@@ -164,8 +164,8 @@ func getUsersData(usersData string) []users {
 	usersSlice = splitdata(usersData, "\n    ")
 
 	// call parser for each user
-	for i, data := range usersSlice {
-		users[i] = parseUserData(data)
+	for _, data := range usersSlice {
+		users = append(users, parseUserData(data))
 	}
 	return users
 }
