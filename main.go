@@ -136,13 +136,21 @@ func getFeatureData(flexlmStats string) []featureUsage {
 
 func parseFeatureData(featureData string) featureUsage {
 	var featureUsage featureUsage
+	var i1, i2 int
 	featureData = strings.Trim(featureData, "\n ")
 	// Get feature number
-	i := strings.Index(featureData, ":")
+	i2 = strings.Index(featureData, ":")
 	// TODO check -1 return
-	featureUsage.Feature = featureData[:i]
-	// featureUsage.IssuedLics =
-
+	featureUsage.Feature = featureData[i1:i2]
+	// Issued licenses
+	i1 = i2
+	i1 = i1 + strings.Index(featureData[i1:], "(Total of ") + len("(Total of ")
+	i2 = i1 + strings.Index(featureData[i1:], " license")
+	featureUsage.IssuedLics = featureData[i1:i2]
+	// Used license
+	i1 = i2 + strings.Index(featureData[i2:], ";  Total of ") + len(";  Total of ")
+	i2 = i1 + strings.Index(featureData[i1:], " license")
+	featureUsage.UsedLics = featureData[i1:i2]
 	return featureUsage
 }
 
