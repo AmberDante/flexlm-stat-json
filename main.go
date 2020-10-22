@@ -79,9 +79,9 @@ func splitdata(s string, sep string) []string {
 	return strings.Split(s, sep)
 }
 
-// TODO Refactor splitServerFeature. Function have to be replaced by method for structs
-// splitServerFeature - Split server and features info to couple of string
-func splitServerFeature(slice []string) (serverInfo, featuresInfo string) {
+// TODO Refactor splitTwoValues. Function have to be replaced by method for structs
+// splitTwoValues - Split server and features info to couple of string
+func splitTwoValues(slice []string) (v1, v2 string) {
 	return slice[0], slice[1]
 }
 
@@ -99,7 +99,7 @@ func getLicenseServersInfo(flexlmStats string) json {
 	// Split data for server info and feature usage info
 	for i, data := range serversFullInfo {
 		slice := splitdata(data, featureUsageSeparator)
-		server, feat := splitServerFeature(slice)
+		server, feat := splitTwoValues(slice)
 		json.LicenseServer = append(json.LicenseServer, parseServerInfo(server))
 		json.LicenseServer[i].FeatureUsage = getFeatureData(feat)
 
@@ -172,6 +172,21 @@ func getUsersData(usersData string) []users {
 
 func parseUserData(userData string) users {
 	var users users
-	// TODO parse user data to struct users
+	var serverHost, serverPort string
+	userData = strings.Trim(userData, "\n ")
+	//parse user data to struct users
+	// TODO check -1 return
+	slice := strings.Split(userData, " ")
+	// Cuts special simbols
+	for i, v := range slice {
+		slice[i] = strings.Trim(v, "(),")
+	}
+	users.Userid = slice[0]
+	users.Host = slice[1]
+	users.Display = slice[2]
+	serverHost, serverPort = splitTwoValues(strings.Split(slice[4], "/"))
+	users.ServerHost = serverHost
+	users.ServerPort = serverPort
+
 	return users
 }
