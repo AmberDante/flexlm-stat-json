@@ -13,6 +13,7 @@ const (
 	exitFail              = 1
 	serverSeparator       = "----------------------------------------------------------------------------"
 	featureUsageSeparator = "Feature usage info:"
+	featuresSeparator     = "Users of "
 )
 
 type json struct {
@@ -78,9 +79,15 @@ func splitdata(s string, sep string) []string {
 	return strings.Split(s, sep)
 }
 
+// TODO Refactor splitServerFeature. Function have to be replaced by method for structs
 // splitServerFeature - Split server and features info to couple of string
-func splitServerFeature(slice []string) (serverInfo string, featuresInfo string) {
+func splitServerFeature(slice []string) (serverInfo, featuresInfo string) {
 	return slice[0], slice[1]
+}
+
+// splitFeatureUsers - Split feature, feature details and users data to separate strings
+func splitFeatureUsers(slice []string) (featureInfo, featureDetails, usersInfo string) {
+	return slice[0], slice[1], slice[2]
 }
 
 func getLicenseServersInfo(flexlmStats string) json {
@@ -110,9 +117,20 @@ func parseServerInfo(serverInfo string) licenseServer {
 // getFeatureData - get data from featire usage info
 func getFeatureData(flexlmStats string) []featureUsage {
 	var featuresUsage []featureUsage
-	// TODO Split data by features by "Users of ".
+	var features []string
+	// Split data by features. String "Users of " will be deleted.
+	features = splitdata(flexlmStats, featuresSeparator)
 
-	// TODO split feature data and active users data
+	// feture with users (data) will be processed
+	for i, data := range features {
+		// TODO split feature data and active users data
+		slice := splitdata(data, "\n\n")
+		featureInfo, _, usersInfo := splitFeatureUsers(slice)
+		featuresUsage[i] = parseFeatureData(featureInfo)
+		featuresUsage[i].Users = getUsersData(usersInfo)
+
+	}
+
 	return featuresUsage
 }
 
@@ -124,9 +142,17 @@ func parseFeatureData(featureData string) featureUsage {
 
 func getUsersData(usersData string) []users {
 	var users []users
-	// TODO split data by users
 
-	// TODO call parser for each user
+	var usersSlice []string
+	// Cut leading and trailing \n and spaces
+	usersData = strings.Trim(usersData, "\n ")
+	// split usersData by users
+	usersSlice = splitdata(usersData, "\n    ")
+
+	// call parser for each user
+	for i, data := range usersSlice {
+		users[i] = parseUserData(data)
+	}
 	return users
 }
 
