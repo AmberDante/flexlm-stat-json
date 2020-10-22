@@ -136,6 +136,12 @@ func getFeatureData(flexlmStats string) []featureUsage {
 
 func parseFeatureData(featureData string) featureUsage {
 	var featureUsage featureUsage
+	featureData = strings.Trim(featureData, "\n ")
+	// Get feature number
+	i := strings.Index(featureData, ":")
+	// TODO check -1 return
+	featureUsage.Feature = featureData[:i]
+	// featureUsage.IssuedLics =
 
 	return featureUsage
 }
