@@ -95,6 +95,55 @@ func Test_getUsersData(t *testing.T) {
 		want []users
 	}{
 		// TODO: Add test cases.
+		{
+			name: "one user",
+			args: args{`    47011 UII434-NB UII434-NB (v1.000) (iss.samba.gazpromproject.ru/27000 46292), start Thu 10/15 11:20`},
+			want: []users{
+				users{
+					Userid:     "47011",
+					Host:       "UII434-NB",
+					Display:    "UII434-NB",
+					ServerHost: "iss.samba.gazpromproject.ru",
+					ServerPort: "27000",
+				},
+			},
+		},
+		{
+			name: "two users with newlines",
+			args: args{`
+			dgridnev SPB-00-005001 spb-00-005001 (v1.000) (iss.samba.gazpromproject.ru/27000 39867), start Thu 10/15 9:05
+			6325 OAPIU036 OAPIU036 (v1.000) (iss.samba.gazpromproject.ru/27000 13856), start Thu 10/15 15:35
+		`},
+			want: []users{
+				users{
+					Userid:     "dgridnev",
+					Host:       "SPB-00-005001",
+					Display:    "spb-00-005001",
+					ServerHost: "iss.samba.gazpromproject.ru",
+					ServerPort: "27000",
+				},
+				users{
+					Userid:     "6325",
+					Host:       "OAPIU036",
+					Display:    "OAPIU036",
+					ServerHost: "iss.samba.gazpromproject.ru",
+					ServerPort: "27000",
+				},
+			},
+		},
+		{
+			name: "empty string",
+			args: args{``},
+			want: []users{
+				users{
+					Userid:     "",
+					Host:       "",
+					Display:    "",
+					ServerHost: "",
+					ServerPort: "",
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

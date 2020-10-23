@@ -188,9 +188,9 @@ func getUsersData(usersData string) []users {
 
 	var usersSlice []string
 	// Cut leading and trailing \n and spaces
-	usersData = strings.Trim(usersData, "\n ")
+	usersData = strings.Trim(usersData, "\n \t")
 	// split usersData by users
-	usersSlice = splitdata(usersData, "\n    ")
+	usersSlice = splitdata(usersData, "\n")
 
 	// call parser for each user
 	for _, data := range usersSlice {
