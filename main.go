@@ -12,6 +12,7 @@ const (
 	exitOK                = 0
 	exitFail              = 1
 	serverSeparator       = "----------------------------------------------------------------------------"
+	serverInfoDelimiter   = "[Detecting lmgrd processes...]\n"
 	featureUsageSeparator = "Feature usage info:"
 	featuresSeparator     = "Users of "
 )
@@ -110,6 +111,34 @@ func getLicenseServersInfo(flexlmStats string) json {
 // parseServerInfo - parse server info block
 func parseServerInfo(serverInfo string) licenseServer {
 	var licenseServer licenseServer
+	var i1, i2 int
+	// Trim unnecessary data
+	serverInfo = strings.Trim(serverInfo, "\n ")
+	i1 = strings.Index(serverInfo, serverInfoDelimiter) + len(serverInfoDelimiter)
+	serverInfo = serverInfo[i1:]
+
+	// Split data by strings
+	slice := strings.Split(serverInfo, "\n\n")
+
+	// Get server name
+	i1 = strings.Index(slice[0], ": ") + 2
+	i2 = strings.Index(slice[0], "\n")
+	licenseServer.Server = slice[0][i1:i2]
+	// Get server status
+	i1 = strings.Index(slice[1], ": license server ") + len(": license server ")
+	i2 = i1 + strings.Index(slice[1][i1:], " ")
+	licenseServer.ServerStatus = slice[1][i1:i2]
+	// Get server version
+	i1 = strings.LastIndex(slice[1], " ") + 1
+	licenseServer.ServerVersion = slice[1][i1:]
+	// Get vendor data
+	slice[3] = strings.Trim(slice[3], "\n ")
+	vendorData := strings.Split(slice[3], " ")
+	if len(vendorData) == 3 {
+		licenseServer.Vendor = vendorData[0]
+		licenseServer.VendorStatus = vendorData[1]
+		licenseServer.VendorVersion = vendorData[2]
+	}
 
 	return licenseServer
 }
