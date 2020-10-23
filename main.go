@@ -202,7 +202,7 @@ func getUsersData(usersData string) []users {
 func parseUserData(userData string) users {
 	var users users
 	var serverHost, serverPort string
-	userData = strings.Trim(userData, "\n ")
+	userData = strings.Trim(userData, "\n \t")
 	//parse user data to struct users
 	// TODO check -1 return
 	slice := strings.Split(userData, " ")
