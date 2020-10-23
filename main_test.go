@@ -75,6 +75,33 @@ func Test_parseFeatureData(t *testing.T) {
 		want featureUsage
 	}{
 		// TODO: Add test cases.
+		{
+			name: "feature 1",
+			args: args{`86468IDSP_2016_0F:  (Total of 13 licenses issued;  Total of 0 licenses in use)`},
+			want: featureUsage{
+				Feature:    "86468IDSP_2016_0F",
+				IssuedLics: "13",
+				UsedLics:   "0",
+			},
+		},
+		{
+			name: "feature 2",
+			args: args{`87252IDSP_2020_0F:  (Total of 13 licenses issued;  Total of 1 license in use)`},
+			want: featureUsage{
+				Feature:    "87252IDSP_2020_0F",
+				IssuedLics: "13",
+				UsedLics:   "1",
+			},
+		},
+		{
+			name: "feature 3 Total of 1 license",
+			args: args{`MapInfo_License_Server:  (Total of 1 license issued;  Total of 0 licenses in use)`},
+			want: featureUsage{
+				Feature:    "MapInfo_License_Server",
+				IssuedLics: "1",
+				UsedLics:   "0",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
