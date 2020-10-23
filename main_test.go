@@ -55,6 +55,85 @@ func Test_getFeatureData(t *testing.T) {
 		want []featureUsage
 	}{
 		// TODO: Add test cases.
+		{
+			name: "get feature with 1 fctive user",
+			args: args{`Users of 87252IDSP_2020_0F:  (Total of 13 licenses issued;  Total of 1 license in use)
+
+"87252IDSP_2020_0F" v1.000, vendor: adskflex, expiry: permanent(no expiration date)
+vendor_string: commercial:permanent
+floating license
+
+  47011 UII434-NB UII434-NB (v1.0) (iss.samba.gazpromproject.ru/27000 46192), start Thu 10/15 11:20
+
+`},
+			want: []featureUsage{
+				featureUsage{
+					Feature:    "87252IDSP_2020_0F",
+					IssuedLics: "13",
+					UsedLics:   "1",
+					Users: []users{
+						users{
+							Userid:     "47011",
+							Host:       "UII434-NB",
+							Display:    "UII434-NB",
+							ServerHost: "iss.samba.gazpromproject.ru",
+							ServerPort: "27000",
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "get feature with 1 fctive user",
+			args: args{`Users of 87089AMECH_PP_2019_0F:  (Total of 240 licenses issued;  Total of 0 licenses in use)
+
+Users of 86839AMECH_PP_2018_0F:  (Total of 240 licenses issued;  Total of 2 licenses in use)
+
+  "86839AMECH_PP_2018_0F" v1.000, vendor: adskflex, expiry: 15-dec-2022
+  vendor_string: commercial:extendable
+  floating license
+
+	1 GM-007028 GM-007028 (v1.0) (iss.samba.gazpromproject.ru/27000 37683), start Thu 10/1 11:44  (linger: 4263164 / 5487240)
+	58000 SKIA011 DESKTOP-0TO69FR (v1.0) (iss.samba.gazpromproject.ru/27000 389), start Wed 10/14 9:04
+
+Users of 86627AMECH_PP_2017_0F:  (Total of 240 licenses issued;  Total of 0 licenses in use)
+`},
+			want: []featureUsage{
+				featureUsage{
+					Feature:    "87089AMECH_PP_2019_0F",
+					IssuedLics: "240",
+					UsedLics:   "0",
+					Users:      []users{users{}},
+				},
+				featureUsage{
+					Feature:    "86839AMECH_PP_2018_0F",
+					IssuedLics: "240",
+					UsedLics:   "2",
+					Users: []users{
+						users{
+							Userid:     "1",
+							Host:       "GM-007028",
+							Display:    "GM-007028",
+							ServerHost: "iss.samba.gazpromproject.ru",
+							ServerPort: "27000",
+						},
+						users{
+							Userid:     "58000",
+							Host:       "SKIA011",
+							Display:    "DESKTOP-0TO69FR",
+							ServerHost: "iss.samba.gazpromproject.ru",
+							ServerPort: "27000",
+						},
+					},
+				},
+				featureUsage{
+					Feature:    "86627AMECH_PP_2017_0F",
+					IssuedLics: "240",
+					UsedLics:   "0",
+					Users:      []users{users{}},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -102,6 +181,15 @@ func Test_parseFeatureData(t *testing.T) {
 				UsedLics:   "0",
 			},
 		},
+		{
+			name: "empty feature",
+			args: args{``},
+			want: featureUsage{
+				Feature:    "",
+				IssuedLics: "",
+				UsedLics:   "",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -139,6 +227,28 @@ func Test_getUsersData(t *testing.T) {
 			name: "two users with newlines",
 			args: args{`
 			dgridnev SPB-00-005001 spb-00-005001 (v1.000) (iss.samba.gazpromproject.ru/27000 39867), start Thu 10/15 9:05
+			6325 OAPIU036 OAPIU036 (v1.000) (iss.samba.gazpromproject.ru/27000 13856), start Thu 10/15 15:35
+		`},
+			want: []users{
+				users{
+					Userid:     "dgridnev",
+					Host:       "SPB-00-005001",
+					Display:    "spb-00-005001",
+					ServerHost: "iss.samba.gazpromproject.ru",
+					ServerPort: "27000",
+				},
+				users{
+					Userid:     "6325",
+					Host:       "OAPIU036",
+					Display:    "OAPIU036",
+					ServerHost: "iss.samba.gazpromproject.ru",
+					ServerPort: "27000",
+				},
+			},
+		},
+		{
+			name: "two users with newlines",
+			args: args{`dgridnev SPB-00-005001 spb-00-005001 (v1.000) (iss.samba.gazpromproject.ru/27000 39867), start Thu 10/15 9:05
 			6325 OAPIU036 OAPIU036 (v1.000) (iss.samba.gazpromproject.ru/27000 13856), start Thu 10/15 15:35
 		`},
 			want: []users{

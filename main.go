@@ -147,14 +147,25 @@ func parseServerInfo(serverInfo string) licenseServer {
 func getFeatureData(flexlmStats string) []featureUsage {
 	var featuresUsage []featureUsage
 	var features []string
+	var featureInfo, usersInfo string
 	// Split data by features. String "Users of " will be deleted.
 	features = splitdata(flexlmStats, featuresSeparator)
+	if len(features[0]) == 0 {
+		features = features[1:]
+	}
 
 	// feture with users (data) will be processed
 	for i, data := range features {
-		// TODO split feature data and active users data
+		data = strings.Trim(data, "\n \t")
+		// split feature data and active users data
 		slice := splitdata(data, "\n\n")
-		featureInfo, _, usersInfo := splitFeatureUsers(slice)
+		if len(slice) > 1 {
+			featureInfo, _, usersInfo = splitFeatureUsers(slice)
+		}
+		if len(slice) == 1 {
+			featureInfo = slice[0]
+			usersInfo = ""
+		}
 		featuresUsage = append(featuresUsage, parseFeatureData(featureInfo))
 		featuresUsage[i].Users = getUsersData(usersInfo)
 
@@ -168,6 +179,9 @@ func parseFeatureData(featureData string) featureUsage {
 	var i1, i2 int
 	featureData = strings.Trim(featureData, "\n \t")
 	// Get feature number
+	if len(featureData) == 0 {
+		return featureUsage
+	}
 	i2 = strings.Index(featureData, ":")
 	// TODO check -1 return
 	featureUsage.Feature = featureData[i1:i2]
