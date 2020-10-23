@@ -203,6 +203,9 @@ func parseUserData(userData string) users {
 	var users users
 	var serverHost, serverPort string
 	userData = strings.Trim(userData, "\n \t")
+	if len(userData) == 0 {
+		return users
+	}
 	//parse user data to struct users
 	// TODO check -1 return
 	slice := strings.Split(userData, " ")

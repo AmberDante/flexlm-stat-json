@@ -150,6 +150,17 @@ func Test_parseUserData(t *testing.T) {
 			},
 		},
 		{
+			name: "empty data",
+			args: args{" "},
+			want: users{
+				Userid:     "",
+				Host:       "",
+				Display:    "",
+				ServerHost: "",
+				ServerPort: "",
+			},
+		},
+		{
 			name: "user 4",
 			args: args{`    eprus SPB-00-001686 spb-00-001686 (v1.000) (iss.samba.gazpromproject.ru/27000 43953), start Mon 9/28 12:43`},
 			want: users{
