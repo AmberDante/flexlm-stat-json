@@ -102,7 +102,9 @@ func getLicenseServersInfo(flexlmStats string) json {
 		slice := splitdata(data, featureUsageSeparator)
 		server, feat := splitTwoValues(slice)
 		json.LicenseServer = append(json.LicenseServer, parseServerInfo(server))
-		json.LicenseServer[i].FeatureUsage = getFeatureData(feat)
+		if len(feat) > 0 {
+			json.LicenseServer[i].FeatureUsage = getFeatureData(feat)
+		}
 
 	}
 	return json
