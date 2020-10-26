@@ -114,11 +114,17 @@ func parseServerInfo(serverInfo string) licenseServer {
 	var i1, i2 int
 	// Trim unnecessary data
 	serverInfo = strings.Trim(serverInfo, "\n ")
-	i1 = strings.Index(serverInfo, serverInfoDelimiter) + len(serverInfoDelimiter)
-	serverInfo = serverInfo[i1:]
+	i1 = strings.Index(serverInfo, serverInfoDelimiter)
+	if i1 >= 0 {
+		i1 = i1 + len(serverInfoDelimiter)
+		serverInfo = serverInfo[i1:]
+	}
 
 	// Split data by strings
 	slice := strings.Split(serverInfo, "\n\n")
+	if len(slice[0]) == 0 {
+		slice = slice[1:]
+	}
 
 	// Get server name
 	i1 = strings.Index(slice[0], ": ") + 2
@@ -134,6 +140,9 @@ func parseServerInfo(serverInfo string) licenseServer {
 	// Get vendor data
 	slice[3] = strings.Trim(slice[3], "\n ")
 	vendorData := strings.Split(slice[3], " ")
+	for i, v := range vendorData {
+		vendorData[i] = strings.Trim(v, ": \t")
+	}
 	if len(vendorData) == 3 {
 		licenseServer.Vendor = vendorData[0]
 		licenseServer.VendorStatus = vendorData[1]

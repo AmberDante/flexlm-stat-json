@@ -35,6 +35,48 @@ func Test_parseServerInfo(t *testing.T) {
 		want licenseServer
 	}{
 		// TODO: Add test cases.
+		{
+			name: "server string 1",
+			args: args{`lmutil - Copyright (c) 1989-2018 Flexera. All Rights Reserved.
+Flexible License Manager status on Thu 10/15/2020 15:45
+
+[Detecting lmgrd processes...]
+License server status: 27000@iss.samba.gazpromproject.ru
+	License file(s) on iss.samba.gazpromproject.ru: F:\Autodesk\Network License Manager\iss.samba.gazpromproject.ru.lic:
+
+iss.samba.gazpromproject.ru: license server UP (MASTER) v11.16.2
+
+Vendor daemon status (on iss.samba.gazpromproject.ru):
+
+  adskflex: UP v11.16.2`},
+			want: licenseServer{
+				Server:        "27000@iss.samba.gazpromproject.ru",
+				ServerStatus:  "UP",
+				ServerVersion: "v11.16.2",
+				Vendor:        "adskflex",
+				VendorStatus:  "UP",
+				VendorVersion: "v11.16.2",
+			},
+		},
+		{
+			name: "server string 2",
+			args: args{`License server status: 27002@iss.samba.gazpromproject.ru
+			License file(s) on iss.samba.gazpromproject.ru: F:\MapInfo\License Server\MILICSERVER.lic:
+
+iss.samba.gazpromproject.ru: license server UP v11.13.0
+
+Vendor daemon status (on iss):
+
+   unisw20: UP v11.13.0`},
+			want: licenseServer{
+				Server:        "27002@iss.samba.gazpromproject.ru",
+				ServerStatus:  "UP",
+				ServerVersion: "v11.13.0",
+				Vendor:        "unisw20",
+				VendorStatus:  "UP",
+				VendorVersion: "v11.13.0",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
