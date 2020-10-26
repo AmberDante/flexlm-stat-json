@@ -84,7 +84,7 @@ Users of 85788BDSADV_F:  (Total of 16 licenses issued;  Total of 0 licenses in u
 			},
 		},
 		{
-			name: "test1",
+			name: "test2",
 			args: args{`lmutil - Copyright (c) 1989-2018 Flexera. All Rights Reserved.
 Flexible License Manager status on Thu 10/15/2020 15:45
 
@@ -265,7 +265,7 @@ func Test_getFeatureData(t *testing.T) {
 	}{
 		// TODO: Add test cases.
 		{
-			name: "get feature with 1 fctive user",
+			name: "get feature with 1 active user",
 			args: args{`Users of 87252IDSP_2020_0F:  (Total of 13 licenses issued;  Total of 1 license in use)
 
 "87252IDSP_2020_0F" v1.000, vendor: adskflex, expiry: permanent(no expiration date)
@@ -293,7 +293,7 @@ floating license
 			},
 		},
 		{
-			name: "get feature with 1 fctive user",
+			name: "get several features",
 			args: args{`Users of 87089AMECH_PP_2019_0F:  (Total of 240 licenses issued;  Total of 0 licenses in use)
 
 Users of 86839AMECH_PP_2018_0F:  (Total of 240 licenses issued;  Total of 2 licenses in use)
