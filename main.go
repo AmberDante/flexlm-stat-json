@@ -176,7 +176,9 @@ func getFeatureData(flexlmStats string) []featureUsage {
 			usersInfo = ""
 		}
 		featuresUsage = append(featuresUsage, parseFeatureData(featureInfo))
-		featuresUsage[i].Users = getUsersData(usersInfo)
+		if len(usersInfo) > 0 {
+			featuresUsage[i].Users = getUsersData(usersInfo)
+		}
 
 	}
 

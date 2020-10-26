@@ -145,7 +145,6 @@ Users of 86627AMECH_PP_2017_0F:  (Total of 240 licenses issued;  Total of 0 lice
 					Feature:    "87089AMECH_PP_2019_0F",
 					IssuedLics: "240",
 					UsedLics:   "0",
-					Users:      []users{users{}},
 				},
 				featureUsage{
 					Feature:    "86839AMECH_PP_2018_0F",
@@ -172,7 +171,6 @@ Users of 86627AMECH_PP_2017_0F:  (Total of 240 licenses issued;  Total of 0 lice
 					Feature:    "86627AMECH_PP_2017_0F",
 					IssuedLics: "240",
 					UsedLics:   "0",
-					Users:      []users{users{}},
 				},
 			},
 		},
