@@ -57,17 +57,17 @@ func main() {
 func run(stdin io.Reader, stdout io.Writer) error {
 	scanner := bufio.NewScanner(stdin)
 	var flexlmStats string
-	var JSONtoOUT jsonOUT
+	var preJSON jsonOUT
 	for scanner.Scan() {
 		flexlmStats = flexlmStats + scanner.Text() + "\n"
 	}
-	JSONtoOUT = getLicenseServersInfo(flexlmStats)
+	preJSON = getLicenseServersInfo(flexlmStats)
 	// TODO !!! marshal JSON struct to JSON object
-	jsonM, err := createJSON(JSONtoOUT)
+	JSONtoOUT, err := createJSON(preJSON)
 	if err != nil {
 		return err
 	}
-	fmt.Fprint(stdout, string(jsonM))
+	fmt.Fprint(stdout, string(JSONtoOUT))
 
 	if err := scanner.Err(); err != nil {
 		return err
