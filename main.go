@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -27,13 +28,13 @@ type licenseServer struct {
 	Vendor        string         `json:"vendor"`
 	VendorStatus  string         `json:"vendor_status"`
 	VendorVersion string         `json:"vendor_version"`
-	FeatureUsage  []featureUsage `json:"feature_usage"`
+	FeatureUsage  []featureUsage `json:"feature_usage,omitempty"`
 }
 type featureUsage struct {
-	Feature    string `json:"feature"`
-	IssuedLics string `json:"issued_lics"`
-	UsedLics   string `json:"used_lics"`
-	Users      []users
+	Feature    string  `json:"feature"`
+	IssuedLics string  `json:"issued_lics"`
+	UsedLics   string  `json:"used_lics"`
+	Users      []users `json:"users,omitempty"`
 }
 type users struct {
 	Userid         string `json:"userid"`
@@ -62,13 +63,24 @@ func run(stdin io.Reader, stdout io.Writer) error {
 	}
 	JSONtoOUT = getLicenseServersInfo(flexlmStats)
 	// TODO !!! marshal JSON struct to JSON object
-
-	fmt.Fprint(stdout, JSONtoOUT)
+	jsonM, err := createJSON(JSONtoOUT)
+	if err != nil {
+		return err
+	}
+	fmt.Fprint(stdout, string(jsonM))
 
 	if err := scanner.Err(); err != nil {
 		return err
 	}
 	return nil
+}
+
+func createJSON(s jsonOUT) (string, error) {
+	jsonM, err := json.Marshal(s)
+	if err != nil {
+		return "", err
+	}
+	return string(jsonM), nil
 }
 
 func splitdata(s string, sep string) []string {
