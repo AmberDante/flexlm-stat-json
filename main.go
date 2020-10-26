@@ -17,7 +17,7 @@ const (
 	featuresSeparator     = "Users of "
 )
 
-type json struct {
+type jsonOUT struct {
 	LicenseServer []licenseServer `json:"license_server"`
 }
 type licenseServer struct {
@@ -56,14 +56,14 @@ func main() {
 func run(stdin io.Reader, stdout io.Writer) error {
 	scanner := bufio.NewScanner(stdin)
 	var flexlmStats string
-	var JSON json
+	var JSONtoOUT jsonOUT
 	for scanner.Scan() {
 		flexlmStats = flexlmStats + scanner.Text() + "\n"
 	}
-	JSON = getLicenseServersInfo(flexlmStats)
+	JSONtoOUT = getLicenseServersInfo(flexlmStats)
 	// TODO !!! marshal JSON struct to JSON object
 
-	fmt.Fprint(stdout, JSON)
+	fmt.Fprint(stdout, JSONtoOUT)
 
 	if err := scanner.Err(); err != nil {
 		return err
@@ -91,9 +91,9 @@ func splitFeatureUsers(slice []string) (featureInfo, featureDetails, usersInfo s
 	return slice[0], slice[1], slice[2]
 }
 
-func getLicenseServersInfo(flexlmStats string) json {
+func getLicenseServersInfo(flexlmStats string) jsonOUT {
 	var serversFullInfo []string
-	var json json
+	var jsonOUT jsonOUT
 	// Split info by server
 	serversFullInfo = splitdata(flexlmStats, serverSeparator)
 
@@ -101,13 +101,13 @@ func getLicenseServersInfo(flexlmStats string) json {
 	for i, data := range serversFullInfo {
 		slice := splitdata(data, featureUsageSeparator)
 		server, feat := splitTwoValues(slice)
-		json.LicenseServer = append(json.LicenseServer, parseServerInfo(server))
+		jsonOUT.LicenseServer = append(jsonOUT.LicenseServer, parseServerInfo(server))
 		if len(feat) > 0 {
-			json.LicenseServer[i].FeatureUsage = getFeatureData(feat)
+			jsonOUT.LicenseServer[i].FeatureUsage = getFeatureData(feat)
 		}
 
 	}
-	return json
+	return jsonOUT
 }
 
 // parseServerInfo - parse server info block
@@ -159,6 +159,7 @@ func getFeatureData(flexlmStats string) []featureUsage {
 	var featuresUsage []featureUsage
 	var features []string
 	var featureInfo, usersInfo string
+	flexlmStats = strings.Trim(flexlmStats, "\n \t")
 	// Split data by features. String "Users of " will be deleted.
 	features = splitdata(flexlmStats, featuresSeparator)
 	if len(features[0]) == 0 {

@@ -12,9 +12,176 @@ func Test_getLicenseServersInfo(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want json
+		want jsonOUT
 	}{
 		// TODO: Add test cases.
+		{
+			name: "test1",
+			args: args{`lmutil - Copyright (c) 1989-2018 Flexera. All Rights Reserved.
+Flexible License Manager status on Thu 10/15/2020 15:45
+
+[Detecting lmgrd processes...]
+License server status: 27000@iss.samba.gazpromproject.ru
+    License file(s) on iss.samba.gazpromproject.ru: F:\Autodesk\Network License Manager\iss.samba.gazpromproject.ru.lic:
+
+iss.samba.gazpromproject.ru: license server UP (MASTER) v11.16.2
+
+Vendor daemon status (on iss.samba.gazpromproject.ru):
+
+  adskflex: UP v11.16.2
+Feature usage info:
+
+Users of 86815AECCOL_T_F:  (Total of 240 licenses issued;  Total of 7 licenses in use)
+
+  "86815AECCOL_T_F" v1.000, vendor: adskflex, expiry: 15-dec-2022
+  vendor_string: commercial:extendable
+  floating license
+
+    eprus SPB-00-001686 spb-00-001686 (v1.000) (iss.samba.gazpromproject.ru/27000 43953), start Mon 9/28 12:43
+    1 GM-007028 GM-007028 (v1.000) (iss.samba.gazpromproject.ru/27000 37583), start Thu 10/1 11:44  (linger: 4263164 / 5487240)
+
+Users of 85788BDSADV_F:  (Total of 16 licenses issued;  Total of 0 licenses in use)
+`},
+			want: jsonOUT{
+				LicenseServer: []licenseServer{
+					licenseServer{
+						Server:        "27000@iss.samba.gazpromproject.ru",
+						ServerStatus:  "UP",
+						ServerVersion: "v11.16.2",
+						Vendor:        "adskflex",
+						VendorStatus:  "UP",
+						VendorVersion: "v11.16.2",
+						FeatureUsage: []featureUsage{
+							featureUsage{
+								Feature:    "86815AECCOL_T_F",
+								IssuedLics: "240",
+								UsedLics:   "7",
+								Users: []users{
+									users{
+										Userid:     "eprus",
+										Host:       "SPB-00-001686",
+										Display:    "spb-00-001686",
+										ServerHost: "iss.samba.gazpromproject.ru",
+										ServerPort: "27000",
+									},
+									users{
+										Userid:     "1",
+										Host:       "GM-007028",
+										Display:    "GM-007028",
+										ServerHost: "iss.samba.gazpromproject.ru",
+										ServerPort: "27000",
+									},
+								},
+							},
+							featureUsage{
+								Feature:    "85788BDSADV_F",
+								IssuedLics: "16",
+								UsedLics:   "0",
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "test1",
+			args: args{`lmutil - Copyright (c) 1989-2018 Flexera. All Rights Reserved.
+Flexible License Manager status on Thu 10/15/2020 15:45
+
+[Detecting lmgrd processes...]
+License server status: 27000@iss.samba.gazpromproject.ru
+    License file(s) on iss.samba.gazpromproject.ru: F:\Autodesk\Network License Manager\iss.samba.gazpromproject.ru.lic:
+
+iss.samba.gazpromproject.ru: license server UP (MASTER) v11.16.2
+
+Vendor daemon status (on iss.samba.gazpromproject.ru):
+
+  adskflex: UP v11.16.2
+Feature usage info:
+
+Users of 86815AECCOL_T_F:  (Total of 240 licenses issued;  Total of 7 licenses in use)
+
+  "86815AECCOL_T_F" v1.000, vendor: adskflex, expiry: 15-dec-2022
+  vendor_string: commercial:extendable
+  floating license
+
+    eprus SPB-00-001686 spb-00-001686 (v1.000) (iss.samba.gazpromproject.ru/27000 43953), start Mon 9/28 12:43
+    1 GM-007028 GM-007028 (v1.000) (iss.samba.gazpromproject.ru/27000 37583), start Thu 10/1 11:44  (linger: 4263164 / 5487240)
+
+Users of 85788BDSADV_F:  (Total of 16 licenses issued;  Total of 0 licenses in use)
+
+
+
+----------------------------------------------------------------------------
+License server status: 27002@iss.samba.gazpromproject.ru
+    License file(s) on iss.samba.gazpromproject.ru: F:\MapInfo\License Server\MILICSERVER.lic:
+
+iss.samba.gazpromproject.ru: license server UP v11.13.0
+
+Vendor daemon status (on iss):
+
+   unisw20: UP v11.13.0
+Feature usage info:
+
+Users of MapInfo_License_Server:  (Total of 1 license issued;  Total of 0 licenses in use)
+
+`},
+			want: jsonOUT{
+				LicenseServer: []licenseServer{
+					licenseServer{
+						Server:        "27000@iss.samba.gazpromproject.ru",
+						ServerStatus:  "UP",
+						ServerVersion: "v11.16.2",
+						Vendor:        "adskflex",
+						VendorStatus:  "UP",
+						VendorVersion: "v11.16.2",
+						FeatureUsage: []featureUsage{
+							featureUsage{
+								Feature:    "86815AECCOL_T_F",
+								IssuedLics: "240",
+								UsedLics:   "7",
+								Users: []users{
+									users{
+										Userid:     "eprus",
+										Host:       "SPB-00-001686",
+										Display:    "spb-00-001686",
+										ServerHost: "iss.samba.gazpromproject.ru",
+										ServerPort: "27000",
+									},
+									users{
+										Userid:     "1",
+										Host:       "GM-007028",
+										Display:    "GM-007028",
+										ServerHost: "iss.samba.gazpromproject.ru",
+										ServerPort: "27000",
+									},
+								},
+							},
+							featureUsage{
+								Feature:    "85788BDSADV_F",
+								IssuedLics: "16",
+								UsedLics:   "0",
+							},
+						},
+					},
+					licenseServer{
+						Server:        "27002@iss.samba.gazpromproject.ru",
+						ServerStatus:  "UP",
+						ServerVersion: "v11.13.0",
+						Vendor:        "unisw20",
+						VendorStatus:  "UP",
+						VendorVersion: "v11.13.0",
+						FeatureUsage: []featureUsage{
+							featureUsage{
+								Feature:    "MapInfo_License_Server",
+								IssuedLics: "1",
+								UsedLics:   "0",
+							},
+						},
+					},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
