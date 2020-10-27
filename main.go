@@ -95,12 +95,29 @@ func splitdata(s string, sep string) []string {
 // TODO Refactor splitTwoValues. Function have to be replaced by method for structs
 // splitTwoValues - Split server and features info to couple of string
 func splitTwoValues(slice []string) (v1, v2 string) {
-	return slice[0], slice[1]
+	switch len(slice) {
+	case 0:
+		return "", ""
+	case 1:
+		return slice[0], ""
+	default:
+		return slice[0], slice[1]
+	}
+
 }
 
 // splitFeatureUsers - Split feature, feature details and users data to separate strings
 func splitFeatureUsers(slice []string) (featureInfo, featureDetails, usersInfo string) {
-	return slice[0], slice[1], slice[2]
+	switch len(slice) {
+	case 0:
+		return "", "", ""
+	case 1:
+		return slice[0], "", ""
+	case 2:
+		return slice[0], slice[1], ""
+	default:
+		return slice[0], slice[1], slice[2]
+	}
 }
 
 func getLicenseServersInfo(flexlmStats string) jsonOUT {
