@@ -22,7 +22,7 @@ type jsonOUT struct {
 	LicenseServer []licenseServer `json:"license_server"`
 }
 type licenseServer struct {
-	Server        string         `json:"{#SERVER}"`
+	Server        string         `json:"server"`
 	ServerStatus  string         `json:"server_status"`
 	ServerVersion string         `json:"server_version"`
 	Vendor        string         `json:"vendor"`
@@ -31,13 +31,13 @@ type licenseServer struct {
 	FeatureUsage  []featureUsage `json:"feature_usage,omitempty"`
 }
 type featureUsage struct {
-	Feature    string  `json:"{#FEATURE}"`
+	Feature    string  `json:"feature"`
 	IssuedLics string  `json:"issued_lics"`
 	UsedLics   string  `json:"used_lics"`
 	Users      []users `json:"users,omitempty"`
 }
 type users struct {
-	Userid         string `json:"{#USERID}"`
+	Userid         string `json:"userid"`
 	Host           string `json:"host"`
 	Display        string `json:"display"`
 	FeatureVersion string `json:"feature_version"`
