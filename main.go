@@ -10,12 +10,14 @@ import (
 )
 
 const (
-	exitOK                = 0
-	exitFail              = 1
-	serverSeparator       = "----------------------------------------------------------------------------"
-	serverInfoDelimiter   = "[Detecting lmgrd processes...]\n"
-	featureUsageSeparator = "Feature usage info:"
-	featuresSeparator     = "Users of "
+	exitOK                     = 0
+	exitFail                   = 1
+	serverSeparator            = "----------------------------------------------------------------------------"
+	serverInfoDelimiter        = "[Detecting lmgrd processes...]\n"
+	licenseServerDelimiter     = "License server status: "
+	vendorDemonStatusDelimiter = "Vendor daemon status "
+	featureUsageSeparator      = "Feature usage info:"
+	featuresSeparator          = "Users of "
 )
 
 type jsonOUT struct {
@@ -92,16 +94,23 @@ func splitdata(s string, sep string) []string {
 	return strings.Split(s, sep)
 }
 
-// TODO Refactor splitTwoValues. Function have to be replaced by method for structs
-// splitTwoValues - Split server and features info to couple of string
-func splitTwoValues(slice []string) (v1, v2 string) {
+// TODO Refactor splitSliceToStrings. Function have to be replaced by method for structs
+// splitSliceToStrings - Split slice to 5 strings
+func splitSliceToStrings(slice []string) (v1, v2, v3, v4, v5 string) {
+
 	switch len(slice) {
 	case 0:
-		return "", ""
+		return "", "", "", "", ""
 	case 1:
-		return slice[0], ""
+		return slice[0], "", "", "", ""
+	case 2:
+		return slice[0], slice[1], "", "", ""
+	case 3:
+		return slice[0], slice[1], slice[2], "", ""
+	case 4:
+		return slice[0], slice[1], slice[2], slice[3], ""
 	default:
-		return slice[0], slice[1]
+		return slice[0], slice[1], slice[2], slice[3], slice[4]
 	}
 
 }
@@ -129,7 +138,7 @@ func getLicenseServersInfo(flexlmStats string) jsonOUT {
 	// Split data for server info and feature usage info
 	for i, data := range serversFullInfo {
 		slice := splitdata(data, featureUsageSeparator)
-		server, feat := splitTwoValues(slice)
+		server, feat, _, _, _ := splitSliceToStrings(slice)
 		jsonOUT.LicenseServer = append(jsonOUT.LicenseServer, parseServerInfo(server))
 		if len(feat) > 0 {
 			jsonOUT.LicenseServer[i].FeatureUsage = getFeatureData(feat)
@@ -142,7 +151,7 @@ func getLicenseServersInfo(flexlmStats string) jsonOUT {
 // parseServerInfo - parse server info block
 func parseServerInfo(serverInfo string) licenseServer {
 	var licenseServer licenseServer
-	var i1, i2 int
+	var i1, i2, iSlice int
 	// Trim unnecessary data
 	serverInfo = strings.Trim(serverInfo, "\n ")
 	i1 = strings.Index(serverInfo, serverInfoDelimiter)
@@ -156,28 +165,39 @@ func parseServerInfo(serverInfo string) licenseServer {
 	if len(slice[0]) == 0 {
 		slice = slice[1:]
 	}
-
 	// Get server name
-	i1 = strings.Index(slice[0], ": ") + 2
-	i2 = strings.Index(slice[0], "\n")
-	licenseServer.Server = slice[0][i1:i2]
-	// Get server status
-	i1 = strings.Index(slice[1], ": license server ") + len(": license server ")
-	i2 = i1 + strings.Index(slice[1][i1:], " ")
-	licenseServer.ServerStatus = slice[1][i1:i2]
-	// Get server version
-	i1 = strings.LastIndex(slice[1], " ") + 1
-	licenseServer.ServerVersion = slice[1][i1:]
-	// Get vendor data
-	slice[3] = strings.Trim(slice[3], "\n ")
-	vendorData := strings.Split(slice[3], " ")
-	for i, v := range vendorData {
-		vendorData[i] = strings.Trim(v, ": \t")
+	iSlice = indexInSlice(slice, licenseServerDelimiter)
+	if iSlice >= 0 {
+		i1 = strings.Index(slice[iSlice], licenseServerDelimiter) + len(licenseServerDelimiter)
+		i2 = strings.Index(slice[iSlice], "\n")
+		licenseServer.Server = slice[iSlice][i1:i2]
 	}
-	if len(vendorData) == 3 {
-		licenseServer.Vendor = vendorData[0]
-		licenseServer.VendorStatus = vendorData[1]
-		licenseServer.VendorVersion = vendorData[2]
+
+	// Get server status
+	iSlice = indexInSlice(slice, ": license server ")
+	if iSlice >= 0 {
+		i1 = strings.Index(slice[iSlice], ": license server ") + len(": license server ")
+		i2 = i1 + strings.Index(slice[iSlice][i1:], " ")
+		licenseServer.ServerStatus = slice[iSlice][i1:i2]
+		// Get server version
+		i1 = strings.LastIndex(slice[iSlice], " ") + 1
+		licenseServer.ServerVersion = slice[iSlice][i1:]
+	}
+
+	// Get vendor data
+	iSlice = indexInSlice(slice, vendorDemonStatusDelimiter)
+	if iSlice >= 0 {
+		iSlice++
+		slice[iSlice] = strings.Trim(slice[iSlice], "\n \t")
+		vendorData := strings.Split(slice[iSlice], " ")
+		for i, v := range vendorData {
+			vendorData[i] = strings.Trim(v, ": \t")
+		}
+		if len(vendorData) == 3 {
+			licenseServer.Vendor = vendorData[0]
+			licenseServer.VendorStatus = vendorData[1]
+			licenseServer.VendorVersion = vendorData[2]
+		}
 	}
 
 	return licenseServer
@@ -270,12 +290,23 @@ func parseUserData(userData string) users {
 	for i, v := range slice {
 		slice[i] = strings.Trim(v, "(),")
 	}
-	users.Userid = slice[0]
-	users.Host = slice[1]
-	users.Display = slice[2]
-	serverHost, serverPort = splitTwoValues(strings.Split(slice[4], "/"))
+	userid, host, display, _, serverInfo := splitSliceToStrings(slice)
+	users.Userid = userid
+	users.Host = host
+	users.Display = display
+	serverHost, serverPort, _, _, _ = splitSliceToStrings(strings.Split(serverInfo, "/"))
 	users.ServerHost = serverHost
 	users.ServerPort = serverPort
 
 	return users
+}
+
+// indexInSlice - returns the index of the first instance of substr in slice or -1 if substr is not present in slice
+func indexInSlice(slice []string, substr string) int {
+	for i := range slice {
+		if strings.Contains(slice[i], substr) {
+			return i
+		}
+	}
+	return -1
 }

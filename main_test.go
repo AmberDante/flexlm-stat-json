@@ -182,6 +182,37 @@ Users of MapInfo_License_Server:  (Total of 1 license issued;  Total of 0 licens
 				},
 			},
 		},
+		{
+			name: "test lmstat -vd",
+			args: args{`lmutil - Copyright (c) 1989-2018 Flexera. All Rights Reserved.
+Wed 10/28/2020 10:48
+
+Vendor daemon status (on iss.samba.gazpromproject.ru):
+
+  adskflex: UP v11.16.2
+
+
+----------------------------------------------------------------------------
+Vendor daemon status (on iss.samba.gazpromproject.ru):
+
+   unisw20: UP v11.13.0
+`},
+			want: jsonOUT{
+				LicenseServer: []licenseServer{
+					licenseServer{
+						Vendor:        "adskflex",
+						VendorStatus:  "UP",
+						VendorVersion: "v11.16.2",
+					},
+					licenseServer{
+
+						Vendor:        "unisw20",
+						VendorStatus:  "UP",
+						VendorVersion: "v11.13.0",
+					},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -202,6 +233,29 @@ func Test_parseServerInfo(t *testing.T) {
 		want licenseServer
 	}{
 		// TODO: Add test cases.
+		{
+			name: "server string empty",
+			args: args{``},
+			want: licenseServer{},
+		},
+		{
+			name: "server string only server info",
+			args: args{`lmutil - Copyright (c) 1989-2018 Flexera. All Rights Reserved.
+Flexible License Manager status on Thu 10/15/2020 15:45
+
+[Detecting lmgrd processes...]
+License server status: 27000@iss.samba.gazpromproject.ru
+	License file(s) on iss.samba.gazpromproject.ru: F:\Autodesk\Network License Manager\iss.samba.gazpromproject.ru.lic:
+
+iss.samba.gazpromproject.ru: license server UP (MASTER) v11.16.2
+
+`},
+			want: licenseServer{
+				Server:        "27000@iss.samba.gazpromproject.ru",
+				ServerStatus:  "UP",
+				ServerVersion: "v11.16.2",
+			},
+		},
 		{
 			name: "server string 1",
 			args: args{`lmutil - Copyright (c) 1989-2018 Flexera. All Rights Reserved.
@@ -242,6 +296,27 @@ Vendor daemon status (on iss):
 				Vendor:        "unisw20",
 				VendorStatus:  "UP",
 				VendorVersion: "v11.13.0",
+			},
+		},
+		{
+			name: "processing lmstat -vd",
+			args: args{`lmutil - Copyright (c) 1989-2018 Flexera. All Rights Reserved.
+Wed 10/28/2020 10:48
+
+Vendor daemon status (on iss.samba.gazpromproject.ru):
+
+  adskflex: UP v11.16.2
+
+
+----------------------------------------------------------------------------
+Vendor daemon status (on iss.samba.gazpromproject.ru):
+
+   unisw20: UP v11.13.0
+`},
+			want: licenseServer{
+				Vendor:        "adskflex",
+				VendorStatus:  "UP",
+				VendorVersion: "v11.16.2",
 			},
 		},
 	}
@@ -479,13 +554,7 @@ func Test_getUsersData(t *testing.T) {
 			name: "empty string",
 			args: args{``},
 			want: []users{
-				users{
-					Userid:     "",
-					Host:       "",
-					Display:    "",
-					ServerHost: "",
-					ServerPort: "",
-				},
+				users{},
 			},
 		},
 	}
@@ -569,6 +638,170 @@ func Test_parseUserData(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := parseUserData(tt.args.userData); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("parseUserData() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_splitFeatureUsers(t *testing.T) {
+	type args struct {
+		slice []string
+	}
+	tests := []struct {
+		name               string
+		args               args
+		wantFeatureInfo    string
+		wantFeatureDetails string
+		wantUsersInfo      string
+	}{
+		// TODO: Add test cases.
+		{
+			name:               "split empty slice",
+			args:               args{[]string{}},
+			wantFeatureInfo:    "",
+			wantFeatureDetails: "",
+			wantUsersInfo:      "",
+		},
+		{
+			name:               "split slice with one element",
+			args:               args{[]string{"one"}},
+			wantFeatureInfo:    "one",
+			wantFeatureDetails: "",
+			wantUsersInfo:      "",
+		},
+		{
+			name:               "split slice with two elements",
+			args:               args{[]string{"one", "two"}},
+			wantFeatureInfo:    "one",
+			wantFeatureDetails: "two",
+			wantUsersInfo:      "",
+		},
+		{
+			name:               "split slice with three elements",
+			args:               args{[]string{"one", "two", "three"}},
+			wantFeatureInfo:    "one",
+			wantFeatureDetails: "two",
+			wantUsersInfo:      "three",
+		},
+		{
+			name:               "split slice with more elements",
+			args:               args{[]string{"one", "two", "three", "4", "5"}},
+			wantFeatureInfo:    "one",
+			wantFeatureDetails: "two",
+			wantUsersInfo:      "three",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotFeatureInfo, gotFeatureDetails, gotUsersInfo := splitFeatureUsers(tt.args.slice)
+			if gotFeatureInfo != tt.wantFeatureInfo {
+				t.Errorf("splitFeatureUsers() gotFeatureInfo = %v, want %v", gotFeatureInfo, tt.wantFeatureInfo)
+			}
+			if gotFeatureDetails != tt.wantFeatureDetails {
+				t.Errorf("splitFeatureUsers() gotFeatureDetails = %v, want %v", gotFeatureDetails, tt.wantFeatureDetails)
+			}
+			if gotUsersInfo != tt.wantUsersInfo {
+				t.Errorf("splitFeatureUsers() gotUsersInfo = %v, want %v", gotUsersInfo, tt.wantUsersInfo)
+			}
+		})
+	}
+}
+
+func Test_splitSliceToStrings(t *testing.T) {
+	type args struct {
+		slice []string
+	}
+	tests := []struct {
+		name   string
+		args   args
+		wantV1 string
+		wantV2 string
+		wantV3 string
+		wantV4 string
+		wantV5 string
+	}{
+		// TODO: Add test cases.
+		{
+			name:   "split empty slice",
+			args:   args{[]string{}},
+			wantV1: "",
+			wantV2: "",
+			wantV3: "",
+			wantV4: "",
+			wantV5: "",
+		},
+		{
+			name:   "split slice with one element",
+			args:   args{[]string{"one"}},
+			wantV1: "one",
+			wantV2: "",
+			wantV3: "",
+			wantV4: "",
+			wantV5: "",
+		},
+		{
+			name:   "split slice with two elements",
+			args:   args{[]string{"one", "two"}},
+			wantV1: "one",
+			wantV2: "two",
+			wantV3: "",
+			wantV4: "",
+			wantV5: "",
+		},
+		{
+			name:   "split slice with three elements",
+			args:   args{[]string{"one", "two", "three"}},
+			wantV1: "one",
+			wantV2: "two",
+			wantV3: "three",
+			wantV4: "",
+			wantV5: "",
+		},
+		{
+			name:   "split slice with four elements",
+			args:   args{[]string{"one", "two", "", "four"}},
+			wantV1: "one",
+			wantV2: "two",
+			wantV3: "",
+			wantV4: "four",
+			wantV5: "",
+		},
+		{
+			name:   "split slice with 5 elements",
+			args:   args{[]string{"one", "two", "3", "four", "five"}},
+			wantV1: "one",
+			wantV2: "two",
+			wantV3: "3",
+			wantV4: "four",
+			wantV5: "five",
+		},
+		{
+			name:   "split slice with more elements",
+			args:   args{[]string{"one", "two", "3", "four", "five", "six"}},
+			wantV1: "one",
+			wantV2: "two",
+			wantV3: "3",
+			wantV4: "four",
+			wantV5: "five",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotV1, gotV2, gotV3, gotV4, gotV5 := splitSliceToStrings(tt.args.slice)
+			if gotV1 != tt.wantV1 {
+				t.Errorf("splitSliceToStrings() gotV1 = %v, want %v", gotV1, tt.wantV1)
+			}
+			if gotV2 != tt.wantV2 {
+				t.Errorf("splitSliceToStrings() gotV2 = %v, want %v", gotV2, tt.wantV2)
+			}
+			if gotV3 != tt.wantV3 {
+				t.Errorf("splitSliceToStrings() gotV3 = %v, want %v", gotV3, tt.wantV3)
+			}
+			if gotV4 != tt.wantV4 {
+				t.Errorf("splitSliceToStrings() gotV4 = %v, want %v", gotV4, tt.wantV4)
+			}
+			if gotV5 != tt.wantV5 {
+				t.Errorf("splitSliceToStrings() gotV5 = %v, want %v", gotV5, tt.wantV5)
 			}
 		})
 	}
