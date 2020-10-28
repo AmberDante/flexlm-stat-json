@@ -63,6 +63,7 @@ Users of 85788BDSADV_F:  (Total of 16 licenses issued;  Total of 0 licenses in u
 										Display:    "spb-00-001686",
 										ServerHost: "iss.samba.gazpromproject.ru",
 										ServerPort: "27000",
+										Feature:    "86815AECCOL_T_F",
 									},
 									users{
 										Userid:     "1",
@@ -70,6 +71,7 @@ Users of 85788BDSADV_F:  (Total of 16 licenses issued;  Total of 0 licenses in u
 										Display:    "GM-007028",
 										ServerHost: "iss.samba.gazpromproject.ru",
 										ServerPort: "27000",
+										Feature:    "86815AECCOL_T_F",
 									},
 								},
 							},
@@ -147,6 +149,7 @@ Users of MapInfo_License_Server:  (Total of 1 license issued;  Total of 0 licens
 										Display:    "spb-00-001686",
 										ServerHost: "iss.samba.gazpromproject.ru",
 										ServerPort: "27000",
+										Feature:    "86815AECCOL_T_F",
 									},
 									users{
 										Userid:     "1",
@@ -154,6 +157,7 @@ Users of MapInfo_License_Server:  (Total of 1 license issued;  Total of 0 licens
 										Display:    "GM-007028",
 										ServerHost: "iss.samba.gazpromproject.ru",
 										ServerPort: "27000",
+										Feature:    "86815AECCOL_T_F",
 									},
 								},
 							},
@@ -362,6 +366,7 @@ floating license
 							Display:    "UII434-NB",
 							ServerHost: "iss.samba.gazpromproject.ru",
 							ServerPort: "27000",
+							Feature:    "87252IDSP_2020_0F",
 						},
 					},
 				},
@@ -399,6 +404,7 @@ Users of 86627AMECH_PP_2017_0F:  (Total of 240 licenses issued;  Total of 0 lice
 							Display:    "GM-007028",
 							ServerHost: "iss.samba.gazpromproject.ru",
 							ServerPort: "27000",
+							Feature:    "86839AMECH_PP_2018_0F",
 						},
 						users{
 							Userid:     "58000",
@@ -406,6 +412,7 @@ Users of 86627AMECH_PP_2017_0F:  (Total of 240 licenses issued;  Total of 0 lice
 							Display:    "DESKTOP-0TO69FR",
 							ServerHost: "iss.samba.gazpromproject.ru",
 							ServerPort: "27000",
+							Feature:    "86839AMECH_PP_2018_0F",
 						},
 					},
 				},
@@ -485,6 +492,7 @@ func Test_parseFeatureData(t *testing.T) {
 func Test_getUsersData(t *testing.T) {
 	type args struct {
 		usersData string
+		feature   string
 	}
 	tests := []struct {
 		name string
@@ -494,7 +502,8 @@ func Test_getUsersData(t *testing.T) {
 		// TODO: Add test cases.
 		{
 			name: "one user",
-			args: args{`    47011 UII434-NB UII434-NB (v1.000) (iss.samba.gazpromproject.ru/27000 46292), start Thu 10/15 11:20`},
+			args: args{usersData: `    47011 UII434-NB UII434-NB (v1.000) (iss.samba.gazpromproject.ru/27000 46292), start Thu 10/15 11:20`,
+				feature: "testFeature"},
 			want: []users{
 				users{
 					Userid:     "47011",
@@ -502,15 +511,18 @@ func Test_getUsersData(t *testing.T) {
 					Display:    "UII434-NB",
 					ServerHost: "iss.samba.gazpromproject.ru",
 					ServerPort: "27000",
+					Feature:    "testFeature",
 				},
 			},
 		},
 		{
 			name: "two users with newlines",
-			args: args{`
+			args: args{usersData: `
 			dgridnev SPB-00-005001 spb-00-005001 (v1.000) (iss.samba.gazpromproject.ru/27000 39867), start Thu 10/15 9:05
 			6325 OAPIU036 OAPIU036 (v1.000) (iss.samba.gazpromproject.ru/27000 13856), start Thu 10/15 15:35
-		`},
+		`,
+				feature: "testFeature2",
+			},
 			want: []users{
 				users{
 					Userid:     "dgridnev",
@@ -518,6 +530,7 @@ func Test_getUsersData(t *testing.T) {
 					Display:    "spb-00-005001",
 					ServerHost: "iss.samba.gazpromproject.ru",
 					ServerPort: "27000",
+					Feature:    "testFeature2",
 				},
 				users{
 					Userid:     "6325",
@@ -525,14 +538,17 @@ func Test_getUsersData(t *testing.T) {
 					Display:    "OAPIU036",
 					ServerHost: "iss.samba.gazpromproject.ru",
 					ServerPort: "27000",
+					Feature:    "testFeature2",
 				},
 			},
 		},
 		{
 			name: "two users with newlines",
-			args: args{`dgridnev SPB-00-005001 spb-00-005001 (v1.000) (iss.samba.gazpromproject.ru/27000 39867), start Thu 10/15 9:05
+			args: args{usersData: `dgridnev SPB-00-005001 spb-00-005001 (v1.000) (iss.samba.gazpromproject.ru/27000 39867), start Thu 10/15 9:05
 			6325 OAPIU036 OAPIU036 (v1.000) (iss.samba.gazpromproject.ru/27000 13856), start Thu 10/15 15:35
-		`},
+		`,
+				feature: "testFeature3",
+			},
 			want: []users{
 				users{
 					Userid:     "dgridnev",
@@ -540,6 +556,7 @@ func Test_getUsersData(t *testing.T) {
 					Display:    "spb-00-005001",
 					ServerHost: "iss.samba.gazpromproject.ru",
 					ServerPort: "27000",
+					Feature:    "testFeature3",
 				},
 				users{
 					Userid:     "6325",
@@ -547,20 +564,24 @@ func Test_getUsersData(t *testing.T) {
 					Display:    "OAPIU036",
 					ServerHost: "iss.samba.gazpromproject.ru",
 					ServerPort: "27000",
+					Feature:    "testFeature3",
 				},
 			},
 		},
 		{
 			name: "empty string",
-			args: args{``},
-			want: []users{
-				users{},
-			},
+			args: args{usersData: ``, feature: ""},
+			want: nil,
+		},
+		{
+			name: "empty string with feature",
+			args: args{usersData: ``, feature: "testFeature4"},
+			want: nil,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := getUsersData(tt.args.usersData); !reflect.DeepEqual(got, tt.want) {
+			if got := getUsersData(tt.args.usersData, tt.args.feature); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("getUsersData() = %v, want %v", got, tt.want)
 			}
 		})

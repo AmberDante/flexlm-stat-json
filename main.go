@@ -42,9 +42,10 @@ type users struct {
 	Userid         string `json:"userid"`
 	Host           string `json:"host"`
 	Display        string `json:"display"`
-	FeatureVersion string `json:"feature_version"`
+	FeatureVersion string `json:"feature_version,omitempty"`
 	ServerHost     string `json:"server_host"`
 	ServerPort     string `json:"server_port"`
+	Feature        string `json:"user_feature,omitempty"`
 }
 
 func main() {
@@ -229,7 +230,7 @@ func getFeatureData(flexlmStats string) []featureUsage {
 		}
 		featuresUsage = append(featuresUsage, parseFeatureData(featureInfo))
 		if len(usersInfo) > 0 {
-			featuresUsage[i].Users = getUsersData(usersInfo)
+			featuresUsage[i].Users = getUsersData(usersInfo, featuresUsage[i].Feature)
 		}
 
 	}
@@ -260,20 +261,25 @@ func parseFeatureData(featureData string) featureUsage {
 	return featureUsage
 }
 
-func getUsersData(usersData string) []users {
-	var users []users
+// getUsersData - get users data with used feature. Return nil if usersData is empty
+func getUsersData(usersData string, feature string) []users {
+	var usersR []users
 
 	var usersSlice []string
 	// Cut leading and trailing \n and spaces
 	usersData = strings.Trim(usersData, "\n \t")
+	if len(usersData) == 0 {
+		return nil
+	}
 	// split usersData by users
 	usersSlice = splitdata(usersData, "\n")
 
 	// call parser for each user
-	for _, data := range usersSlice {
-		users = append(users, parseUserData(data))
+	for i, data := range usersSlice {
+		usersR = append(usersR, parseUserData(data))
+		usersR[i].Feature = feature
 	}
-	return users
+	return usersR
 }
 
 func parseUserData(userData string) users {
