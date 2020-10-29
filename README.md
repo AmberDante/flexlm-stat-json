@@ -6,9 +6,10 @@ It can help you to get all necessary statistics of FlexLM with one Item(Servers,
 
 ## How to use
 
-copy **flexlm-stat-json** to `/usr/lib/zabbix/externalscripts` or to the host where FlexLM runs  
+copy External Script **flexlm_json.sh** to `/usr/lib/zabbix/externalscripts`. It's default folder for zabbix external scripts. It can be defined by zabbix config file.  
+copy **flexlm-stat-json** to `/usr/lib/zabbix/externalscripts` or to the host where FlexLM runs. If you copy **flexlm-stat-json** to the host where FlexLM runs you have to rewrite **flexlm_json.sh** for that changes.  
 
-write a external script which take data to STDIN of **flexlm-stat-json**
+External script which take data to STDIN of **flexlm-stat-json** can look like thath examples
 
 
 Example 1:

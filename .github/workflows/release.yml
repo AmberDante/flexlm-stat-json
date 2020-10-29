@@ -6,21 +6,25 @@ on:
       - v*
 
 jobs:
-  release:
-    name: Release on GitHub
+  goreleaser:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out code
+      -
+        name: Checkout
         uses: actions/checkout@v2
-
-      - name: Validates GO releaser config
-        uses: docker://goreleaser/goreleaser:latest
         with:
-          args: check
-
-      - name: Create release on GitHub
-        uses: docker://goreleaser/goreleaser:latest
+          fetch-depth: 0
+      -
+        name: Set up Go
+        uses: actions/setup-go@v2
         with:
-          args: release
+          go-version: 1.15
+      -
+        name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v2
+        with:
+          version: latest
+          args: release --rm-dist
+          extra_files: flexlm_json.sh
         env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
