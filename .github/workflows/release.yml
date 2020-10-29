@@ -22,7 +22,6 @@ jobs:
       -
         name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
-        extra_files: ./flexlm_json.sh
         with:
           version: latest
           args: release --rm-dist
