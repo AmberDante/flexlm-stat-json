@@ -22,8 +22,10 @@ jobs:
       -
         name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
+        extra_files: ./flexlm_json.sh
         with:
           version: latest
-          args: release --rm-dist extra_files flexlm_json.sh
+          args: release --rm-dist
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          extra_files: ./flexlm_json.sh
